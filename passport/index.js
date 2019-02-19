@@ -1,49 +1,56 @@
 
-import passport from 'passport'
-import { BasicStrategy } from 'passport-http'
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
+const passport = require('passport');
+const { BasicStrategy } = require('passport-http'); 
+const { Strategy, ExtractJwt } = require('passport-jwt');  
+const { jwtSecret } = require('../config');
 
-passport.use('password', new BasicStrategy((email, password, done) => {
-
-    const userSchema = new Schema({
-        email: schema.tree.email,
-        password: schema.tree.password
+exports.password = () => (req, res, next) =>
+  passport.authenticate('password', { session: false }, (err, user, info) => {
+    if (err && err.param) {
+      return res.status(400).json(err)
+    } else if (err || !user) {
+      return res.status(401).end()
+    }
+    req.logIn(user, { session: false }, (err) => {
+      if (err) return res.status(401).end()
+      next()
     })
+  })(req, res, next)
 
-    userSchema.validate({
-        email,
-        password
-    }, (err) => {
-        if (err) done(err)
+  exports.token = () => (req, res, next) => 
+  passport.authenticate('token', { session: false }, (err, user, info) => {
+    if (err) {
+      return res.status(401).end()
+    }
+    req.logIn(user, { session: false }, (err) => {
+      if (err) return res.status(401).end()
+      next()
     })
+  })(req, res, next)
 
-    User.findOne({
-        email
-    }).then((user) => {
-        if (!user) {
-            done(true)
-            return null
-        }
-        return user.authenticate(password, user.password).then((user) => {
-            done(null, user)
-            return null
-        }).catch(done)
-    })
+passport.use('password', new BasicStrategy((username, password, done) => {
+    const {masterUsername, masterPasword} = config;
+
+    if(masterUsername !== username || masterPasword !== password){
+        done(true);
+        return null;
+    }
+
+    done(null, { username })
+    return null
 }))
 
-
-passport.use('token', new JwtStrategy({
+passport.use('token', new Strategy({
     secretOrKey: jwtSecret,
     jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromUrlQueryParameter('access_token'),
         ExtractJwt.fromBodyField('access_token'),
         ExtractJwt.fromAuthHeaderWithScheme('Bearer')
     ])
-}, ({
-    id
-}, done) => {
-    User.findById(id).then((user) => {
-        done(null, user)
-        return null
-    }).catch(done)
+}, ( { user }, done) => {
+    if(masterUsername !== username){
+        done(true);
+        return null;
+    }
+    done(null, user)
 }))

@@ -9,7 +9,8 @@ const requireProcessEnv = (name) => {
 
 const config = {
     masterUsername: requireProcessEnv('USERNAME'),
-    masterPassword: requireProcessEnv('PASSWORD')
+    masterPassword: requireProcessEnv('PASSWORD'),
+    jwtSecret: 'elonMask'
 }
 
 module.exports = config;
