@@ -19,9 +19,11 @@
   "homepage": "https://github.com/dimaq12/proxy-server#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.4",
     "dotenv": "^6.2.0",
     "es6-promisify": "^6.0.1",
     "express": "^4.16.4",
+    "express-session": "^1.15.6",
     "http-proxy-middleware": "git+https://github.com/chimurai/http-proxy-middleware.git",
     "jsonwebtoken": "^8.4.0",
     "nodemon": "^1.18.10",
