@@ -1,11 +1,12 @@
 
 const passport = require('passport');
-const { BasicStrategy } = require('passport-http'); 
+const BasicStrategy = require('passport-local').Strategy; 
 const { Strategy, ExtractJwt } = require('passport-jwt');  
-const { jwtSecret } = require('../config');
+const config  = require('../config');
+const { signSync }  = require('../jwt');
 
 exports.password = () => (req, res, next) =>
-  passport.authenticate('password', { session: false }, (err, user, info) => {
+  passport.authenticate('password', { session: false, successRedirect: '/' }, (err, user, info) => {
     if (err && err.param) {
       return res.status(400).json(err)
     } else if (err || !user) {
@@ -29,9 +30,8 @@ exports.password = () => (req, res, next) =>
   })(req, res, next)
 
 passport.use('password', new BasicStrategy((username, password, done) => {
-    const {masterUsername, masterPasword} = config;
-
-    if(masterUsername !== username || masterPasword !== password){
+    const { masterUsername, masterPassword } = config;
+    if(masterUsername !== username || masterPassword !== password){
         done(true);
         return null;
     }
@@ -41,7 +41,7 @@ passport.use('password', new BasicStrategy((username, password, done) => {
 }))
 
 passport.use('token', new Strategy({
-    secretOrKey: jwtSecret,
+    secretOrKey: config.jwtSecret,
     jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromUrlQueryParameter('access_token'),
         ExtractJwt.fromBodyField('access_token'),
@@ -54,3 +54,5 @@ passport.use('token', new Strategy({
     }
     done(null, user)
 }))
+
+exports.passport = passport;
