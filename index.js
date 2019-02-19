@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { signSync }  = require('./jwt');
 const { password, token, passport } = require('./passport');
+const config = require('./config');
  
 const app = express();
 
@@ -22,7 +23,7 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', password(), (req, res, next) => {
-    const token = signSync(req.user.username, {expiresIn: '1m'});
+    const token = signSync(req.user.username, {expiresIn: config.expirationTime});
     res.cookie('access_token', token)
     res.redirect('/')
 })

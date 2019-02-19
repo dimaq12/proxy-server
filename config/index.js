@@ -10,6 +10,7 @@ const requireProcessEnv = (name) => {
 const config = {
     masterUsername: requireProcessEnv('MYUSER'),
     masterPassword: requireProcessEnv('PASSWORD'),
+    expirationTime: '5m',
     jwtSecret: 'elonMask'
 }
 
