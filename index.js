@@ -4,7 +4,7 @@ const proxy = require('http-proxy-middleware');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { signSync }  = require('./jwt');
-const { password, token, passport } = require('./passport');
+const { password, token, passport, refresh } = require('./passport');
 const config = require('./config');
  
 const app = express();
@@ -23,7 +23,7 @@ app.get('/login', (req, res) => {
 })
 
 app.post('/login', password(), (req, res, next) => {
-    const token = signSync(req.user.username, {expiresIn: config.expirationTime});
+    const token = signSync(req.user.username, {expiresIn: config.expirationTime, notBefore: '1m'});
     res.cookie('access_token', token)
     res.redirect('/')
 })
@@ -36,5 +36,5 @@ var wsProxy = proxy('/services', {
 })
 
 app.use(wsProxy)
-app.use('*', token(), proxy({ target: 'http://0.0.0.0:3000', changeOrigin: true }))
+app.use('*', token(), refresh(), proxy({ target: 'http://0.0.0.0:3000', changeOrigin: true }))
 app.listen(4000)
