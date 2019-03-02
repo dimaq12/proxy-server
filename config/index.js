@@ -1,4 +1,4 @@
-require('dotenv').config({ path: 'credentials.env' });
+require('dotenv').config({ path: '.env' });
 
 const requireProcessEnv = (name) => {
     if (!process.env[name]) {
@@ -10,8 +10,8 @@ const requireProcessEnv = (name) => {
 const config = {
     masterUsername: requireProcessEnv('MYUSER'),
     masterPassword: requireProcessEnv('PASSWORD'),
-    expirationTime: '30s',
-    timeBeforeExpiration: '15s',
+    expirationTime: requireProcessEnv('EXP_TIME'),
+    timeBeforeExpiration: requireProcessEnv('PROPAGATE_EXP_TIME'),
     jwtSecret: 'elonMask'
 }
 

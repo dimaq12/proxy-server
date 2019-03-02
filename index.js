@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const { signSync }  = require('./jwt');
 const { password, token, passport, refresh } = require('./passport');
 const config = require('./config');
+const fs = require('fs');
  
 const app = express();
 
@@ -22,19 +23,33 @@ app.get('/login', (req, res) => {
 	res.render('login');
 })
 
+app.get('/logout', (req, res, next) => {
+  res.cookie('access_token', '');
+  res.redirect('/')
+})
+
+
 app.post('/login', password(), (req, res, next) => {
     const token = signSync(req.user.username, {expiresIn: config.expirationTime});
     res.cookie('access_token', token)
     res.redirect('/')
 })
 
+function onOpen(proxySocket) {
+  // listen for messages coming FROM the target here
+  proxySocket.on('data', function(data) {
+  })
+}
+
 var wsProxy = proxy('/services', {
     target: 'http://0.0.0.0:3000',
     changeOrigin: true,
     ws: true, 
-    logLevel: 'debug'
+    logLevel: 'debug',
+    onOpen: onOpen
 })
 
 app.use(wsProxy)
 app.use('*', token(), proxy({ target: 'http://0.0.0.0:3000', changeOrigin: true }))
-app.listen(4000)
+let server = app.listen(4000)
+server.on('upgrade', wsProxy.upgrade)
