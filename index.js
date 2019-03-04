@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const { signSync }  = require('./jwt');
 const { password, token, passport, refresh } = require('./passport');
 const config = require('./config');
-const fs = require('fs');
+const ms  = require('ms');
  
 const app = express();
 
@@ -34,10 +34,16 @@ app.post('/login', password(), (req, res, next) => {
     res.cookie('access_token', token)
     res.redirect('/')
 })
-
 function onOpen(proxySocket) {
+  let time;
   // listen for messages coming FROM the target here
   proxySocket.on('data', function(data) {
+    if(data.length > 100){
+      clearTimeout(time);
+      time = setTimeout(() => {
+        proxySocket.destroy();
+      }, Math.round(ms(config.expirationTime)));
+    }
   })
 }
 
